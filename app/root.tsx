@@ -2,10 +2,14 @@ import {
   isRouteErrorResponse,
   Links,
   Meta,
+  Navigate,
   Outlet,
   Scripts,
   ScrollRestoration,
-} from "react-router";
+  useLocation,
+  useRoutes,
+} from "react-router-dom";
+import routes from "./routes";
 
 import type { Route } from "./+types/root";
 import "./app.css";
@@ -15,6 +19,7 @@ import "./styles/theme.css";
 import Navbar from "./components/Navbar";
 import "./components/ThemeSwitcher"
 import ThemeSwitcher from "./components/ThemeSwitcher";
+import { isAuthenticated } from "./services/auth";
 
 
 export const links: Route.LinksFunction = () => [
@@ -30,6 +35,26 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
+const publicPaths = [
+  "/",
+  "/about",
+  "/docs",
+  "/contacts",
+  "/vacancies",
+  "/home",
+]
+
+export function Root(){
+  //const element = useRoutes(routes);
+  const location = useLocation();
+  const currentPath = location.pathname;
+
+  if (!isAuthenticated() && publicPaths.includes(currentPath))
+    return <Navigate to="/" replace />
+  
+  return useRoutes(routes as any)
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
@@ -41,7 +66,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <Navbar />
-        <ThemeSwitcher />
         {children}
         <ScrollRestoration />
         <Scripts />
